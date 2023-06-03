@@ -140,16 +140,28 @@ img {
  </div>
  <div>
     <div class="price-box">
-      <p class="text-item"><img src="/PulseX_X.svg" alt="PulseX_X.svg" /></p>
-      <p class="text-item">{basicMetrics.pulsex_price}$</p>
+      <p class="text-item"><img src="/pulsex.png" alt="pulsex.png" /></p>
+      <p class="text-item">${basicMetrics.pulsex_price}</p>
    </div>
  </div>
  <div>
    <div class="price-box">
-     <p class="text-item"><img src="/PulseChain_logo_vector.svg" alt="PulseChain_logo_vector.svg" /></p>
-     <p class="text-item">{basicMetrics.pls_price}$</p>
+     <p class="text-item"><img src="/pls.png" alt="pls.png" /></p>
+     <p class="text-item">${basicMetrics.pls_price}</p>
    </div>
  </div>
+ <div>
+  <div class="price-box">
+    <p class="text-item"><img src="/inc.png" alt="inc.png" /></p>
+    <p class="text-item">${basicMetrics.inc_price}</p>
+  </div>
+  </div>
+  <div>
+  <div class="price-box">
+    <p class="text-item"><img src="/phex.png" alt="phex.png" /></p>
+    <p class="text-item">${basicMetrics.phex_price}</p>
+  </div>
+</div>
 </div>
 
 <slot />
