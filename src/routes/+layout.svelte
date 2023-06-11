@@ -1,13 +1,17 @@
 <script>
   import '@picocss/pico'
   import '../app.css'
-  import { BasicMetricsCls, basic_metrics } from '../store.js';
+  import { BasicMetricsCls, PricesCls, prices, basic_metrics } from '../store.js';
   import { onDestroy } from 'svelte';
 
-  let basicMetrics = new BasicMetricsCls();
+  let metric = new BasicMetricsCls();
+  let price = new PricesCls();
 
-  const unsubscribe = basic_metrics.subscribe((obj) => basicMetrics = obj);
-  onDestroy(unsubscribe);
+  const unsubscribe_metric = basic_metrics.subscribe((obj) => metric = obj);
+  const unsubscribe_price = prices.subscribe((obj) => price = obj);
+
+  onDestroy(unsubscribe_metric);
+  onDestroy(unsubscribe_price);
 </script>
 
 <style>
@@ -135,33 +139,33 @@ img {
             </g>
         </svg>
       </div>
-    <div><p class="text-item">block number: {basicMetrics.current_block}</p></div>
+    <div><p class="text-item">block number: {metric.current_block}</p></div>
   </div>
  </div>
  <div>
-    <div class="price-box">
+  <div class="price-box">
       <p class="text-item"><img src="/pulsex.png" alt="pulsex.png" /></p>
-      <p class="text-item">${basicMetrics.pulsex_price}</p>
+      <p class="text-item">${price['PLSX']}</p>
    </div>
  </div>
  <div>
    <div class="price-box">
      <p class="text-item"><img src="/pls.png" alt="pls.png" /></p>
-     <p class="text-item">${basicMetrics.pls_price}</p>
+     <p class="text-item">${price['PLS']}</p>
    </div>
  </div>
  <div>
-  <div class="price-box">
-    <p class="text-item"><img src="/inc.png" alt="inc.png" /></p>
-    <p class="text-item">${basicMetrics.inc_price}</p>
-  </div>
+   <div class="price-box">
+     <p class="text-item"><img src="/inc.png" alt="inc.png" /></p>
+     <p class="text-item">${price['INC']}</p>
+   </div>
   </div>
   <div>
-  <div class="price-box">
-    <p class="text-item"><img src="/phex.png" alt="phex.png" /></p>
-    <p class="text-item">${basicMetrics.phex_price}</p>
+    <div class="price-box">
+      <p class="text-item"><img src="/phex.png" alt="phex.png" /></p>
+      <p class="text-item">${price['HEX']}</p>
+    </div>
   </div>
-</div>
 </div>
 
 <slot />

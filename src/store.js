@@ -3,10 +3,24 @@ import { writable } from "svelte/store";
 
 export class BasicMetricsCls {
     current_block = parseInt(PUBLIC_SNAPSHOT_BLOCK_NUMBER);
-    pls_price = '';
-    pulsex_price = '';
-    phex_price = '';
-    inc_price = '';
+}
+
+export class PricesCls {
+    PLS = '';
+    PLSX = '';
+    HEX = '';
+    INC = '';
+}
+
+export class UserPortfolioCls {
+    user_address = '';
+    user_pls_balance = '';
+    user_pls_dollar_val = '';
+    total_dollar = '';
+    tokens = [];
+    lp_tokens = [];
 }
 
 export const basic_metrics = writable(new BasicMetricsCls());
+export const prices = writable(new PricesCls());
+export const user_portfolio = writable(new UserPortfolioCls());

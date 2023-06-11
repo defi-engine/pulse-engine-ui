@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@picocss/pico": "^1.5.10",
 		"echarts": "^5.4.2",
+		"ethers": "^6.5.1",
 		"svelte-echarts": "^0.0.5"
 	}
 }

@@ -3,6 +3,8 @@
     import { Chart } from 'svelte-echarts'
     import { onMount } from 'svelte';
 
+    import { user_portfolio } from '../store';
+
     export let pool_init_metrics;
 
     let options = getOptions(pool_init_metrics.ratio, 777);
@@ -54,7 +56,7 @@
       <div class="echart">
         <Chart {options} />
       </div>
-
+          <!-- 🧭 -->
       <div class="metrics">
         <div class="metric">
           ⛽ fuel consumption: {fuel_consumption} PLS
@@ -143,6 +145,7 @@
       0 0 10px #8000ff,
       0 0 10px #e619e6;
   }
+
   .echart {
     z-index: 6;
     overflow: hidden;
