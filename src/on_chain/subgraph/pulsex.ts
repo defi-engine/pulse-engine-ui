@@ -1,7 +1,7 @@
 const graphql_url: string =  'https://graph.pulsechain.com/subgraphs/name/pulsechain/pulsex';
 
 
-export async function getTokenData(contract_address: string) {
+export async function graph_getTokenPrice(contract_address: string) {
     let obj = {token_dollar_price: NaN, token_pls_price: NaN}
     const res = await fetch(graphql_url, {
       method: 'POST',

@@ -1,7 +1,7 @@
 const graphql_url: string =  'https://graph.pulsechain.com/subgraphs/name/pulsechain/blocks';
 
 
-export async function getLatestBlock() {
+export async function graph_getLatestBlock() {
     const res = await fetch(graphql_url, {
       method: 'POST',
       headers: {

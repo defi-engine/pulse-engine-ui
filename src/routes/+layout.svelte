@@ -1,7 +1,8 @@
 <script>
   import '@picocss/pico'
   import '../app.css'
-  import { BasicMetricsCls, PricesCls, prices, basic_metrics } from '../store.js';
+    import { getUIFormat } from '../utils'
+  import { BasicMetricsCls, PricesCls, prices, basic_metrics } from '../store';
   import { onDestroy } from 'svelte';
 
   let metric = new BasicMetricsCls();
@@ -145,25 +146,25 @@ img {
  <div>
   <div class="price-box">
       <p class="text-item"><img src="/pulsex.png" alt="pulsex.png" /></p>
-      <p class="text-item">${price['PLSX']}</p>
+      <p class="text-item">${getUIFormat(price['PLSX'], 6)}</p>
    </div>
  </div>
  <div>
    <div class="price-box">
      <p class="text-item"><img src="/pls.png" alt="pls.png" /></p>
-     <p class="text-item">${price['PLS']}</p>
+     <p class="text-item">${getUIFormat(price['PLS'], 5)}</p>
    </div>
  </div>
  <div>
    <div class="price-box">
      <p class="text-item"><img src="/inc.png" alt="inc.png" /></p>
-     <p class="text-item">${price['INC']}</p>
+     <p class="text-item">${getUIFormat(price['INC'])}</p>
    </div>
   </div>
   <div>
     <div class="price-box">
       <p class="text-item"><img src="/phex.png" alt="phex.png" /></p>
-      <p class="text-item">${price['HEX']}</p>
+      <p class="text-item">${getUIFormat(price['HEX'])}</p>
     </div>
   </div>
 </div>

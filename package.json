@@ -24,6 +24,7 @@
 		"@picocss/pico": "^1.5.10",
 		"echarts": "^5.4.2",
 		"ethers": "^6.5.1",
-		"svelte-echarts": "^0.0.5"
+		"svelte-echarts": "^0.0.5",
+		"ts-node": "^10.9.1"
 	}
 }

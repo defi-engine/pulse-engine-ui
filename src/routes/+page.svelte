@@ -1,51 +1,55 @@
 <script>
   import { onMount } from 'svelte';
-  import { prices, basic_metrics, user_portfolio } from '../store.js';
+  import { prices, basic_metrics, user } from '../store';
+  import { getUIFormat } from '../utils'
 
-  import { getLatestBlock } from '../on_chain/subgraph/blocks'
-  import { getTokenData } from '../on_chain/subgraph/pulsex'
-  import { 
-    token_contracts,
-    lp_token_contracts,
-    getPLSBalance, 
-    getTokenBalance,
-    getContractData,
-    icons
-  } from '../on_chain/rpc/account'
+  import { graph_getLatestBlock } from '../on_chain/subgraph/blocks'
+  import { graph_getTokenPrice } from '../on_chain/subgraph/pulsex'
+  import { token_contracts } from '../on_chain/rpc/constants'
+  import {
+    icons, 
+    account_getUserAssetsBalance, 
+    account_getUserLPData,
+    account_getUserDollarPortfolio,
+    account_getUserFarmsMetric,
+  } from '../on_chain/account'
+  
+import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
 
   import Board from '$lib/Board.svelte'
 
-  let user_pools = [];
+  let metrics = [];
+  let user_data_update_timer;
 
   onMount(async () => {
     const interval_1 = setInterval(async () => {
-      const block = await getLatestBlock();
+      const block = await graph_getLatestBlock();
       $basic_metrics.current_block = block.number;
     }, 10000);
 
     const interval_2 = setInterval(async () => {
-      const obj_pulsex = await getTokenData(token_contracts.PULSE_X_CONTRACT_ADDRESS);
-      const obj_phex = await getTokenData(token_contracts.HEX_CONTRACT_ADDRESS);
-      const obj_inc = await getTokenData(token_contracts.INC_CONTRACT_ADDRESS);
+      const obj_pulsex = await graph_getTokenPrice(token_contracts.PULSE_X_CONTRACT_ADDRESS);
+      const obj_phex = await graph_getTokenPrice(token_contracts.HEX_CONTRACT_ADDRESS);
+      const obj_inc = await graph_getTokenPrice(token_contracts.INC_CONTRACT_ADDRESS);
 
-      $prices['PLSX'] = obj_pulsex.token_dollar_price.toFixed(8);
-      $prices['PLS'] = ((1/Number(obj_pulsex.token_pls_price)) * Number(obj_pulsex.token_dollar_price)).toFixed(8);
-      $prices['HEX'] = obj_phex.token_dollar_price.toFixed(8);
-      $prices['INC'] = obj_inc.token_dollar_price.toFixed(8);
+      $prices['PLSX'] = obj_pulsex.token_dollar_price;
+      $prices['PLS'] = (1/Number(obj_pulsex.token_pls_price)) * Number(obj_pulsex.token_dollar_price);
+      $prices['HEX'] = obj_phex.token_dollar_price;
+      $prices['INC'] = obj_inc.token_dollar_price;
 
     }, 60000);
 
-    const block = await getLatestBlock();
-    const obj_pulsex = await getTokenData(token_contracts.PULSE_X_CONTRACT_ADDRESS);
-    const obj_phex = await getTokenData(token_contracts.HEX_CONTRACT_ADDRESS);
-    const obj_inc = await getTokenData(token_contracts.INC_CONTRACT_ADDRESS);
+    const block = await graph_getLatestBlock();
+    const obj_pulsex = await graph_getTokenPrice(token_contracts.PULSE_X_CONTRACT_ADDRESS);
+    const obj_phex = await graph_getTokenPrice(token_contracts.HEX_CONTRACT_ADDRESS);
+    const obj_inc = await graph_getTokenPrice(token_contracts.INC_CONTRACT_ADDRESS);
 
     $basic_metrics.current_block = block.number;
 
-    $prices['PLSX'] = obj_pulsex.token_dollar_price.toFixed(8);
-    $prices['PLS'] = ((1/Number(obj_pulsex.token_pls_price)) * Number(obj_pulsex.token_dollar_price)).toFixed(8);
-    $prices['HEX'] = obj_phex.token_dollar_price.toFixed(8);
-    $prices['INC'] = obj_inc.token_dollar_price.toFixed(8);
+    $prices['PLSX'] = obj_pulsex.token_dollar_price;
+    $prices['PLS'] = (1/Number(obj_pulsex.token_pls_price)) * Number(obj_pulsex.token_dollar_price);
+    $prices['HEX'] = obj_phex.token_dollar_price;
+    $prices['INC'] = obj_inc.token_dollar_price;
 
     return () => {
       clearInterval(interval_1);
@@ -81,77 +85,39 @@
       return;
     }
 
+    const user_address = fields.address.trim();
+    fields.address = "";
+
     // 🔗 start collecting on chain data 🔗
     on_chain = true;
 
-    // get user portfolio data
-    $user_portfolio.user_address = fields.address.trim();
-    fields.address = "";
+    const tokens = await account_getUserAssetsBalance(user_address);
+    const lp_tokens = await account_getUserLPData(user_address); // lp balances which is not stored in farms
+    const portfolio = await account_getUserDollarPortfolio(tokens, $prices);
+    const farms_metric = await account_getUserFarmsMetric(user_address); // farms metrics where user is participated
 
-    const pls_balance = await getPLSBalance($user_portfolio.user_address);
+    user_data_update_timer = setInterval(async () => {
+      const farms_metric = await account_getUserFarmsMetric(user_address); // farms metrics where user is participated
+      $user.farms_metric = farms_metric;
+    }, 10000);
 
-    // TOKENS
-    const token_list = Object.values(token_contracts);
-    const tokens = [];
-    for (let i = 0; i < token_list.length; i++) {
-      const token = await getTokenBalance($user_portfolio.user_address, token_list[i]);
-      if (Number(token?.balance) === 0.0) {
-        continue;
-      }
-      tokens.push(token);
-    }
-
-    // LP CONTRACTS
-    const lp_list = Object.entries(lp_token_contracts);
-    const lp_tokens = [];
-    for (let i = 0; i < lp_list.length; i++) {
-      let version = "";
-      if (lp_list[i][0].includes("V1")) {version = "V1"};
-      if (lp_list[i][0].includes("V2")) {version = "V2"};
-
-      const lp = await getContractData($user_portfolio.user_address, lp_list[i][1]);
-      lp.version = version;
-
-      if (Number(lp?.balance) === 0.0) {
-        continue;
-      }
-      lp_tokens.push(lp);
-    }
-
-    $user_portfolio.user_pls_balance = Number(pls_balance).toFixed(3);
-    $user_portfolio.tokens = tokens;
-    $user_portfolio.lp_tokens = lp_tokens;
-
-    // collect dollar values
-    let total_dollar = 0;
-    $user_portfolio.user_pls_dollar_val = (Number($user_portfolio.user_pls_balance) * Number($prices['PLS'])).toFixed(3)
-    total_dollar = Number($user_portfolio.user_pls_balance) * Number($prices['PLS']);
-    for (let i = 0; i < $user_portfolio.tokens.length; i++) {
-      const price = $prices[$user_portfolio.tokens[i].symbol];
-      const balance = $user_portfolio.tokens[i].balance
-      if (isNaN(price) || isNaN(balance)) {
-        continue;
-      }
-
-      const dollar_value = Number(price) * Number(balance);
-      total_dollar = total_dollar + dollar_value;
-      $user_portfolio.tokens[i].dollar_value = dollar_value.toFixed(3);
-    }
-    $user_portfolio.total_dollar = total_dollar.toFixed(3);
-
-    const res = await fetch("/api/mock_data");
-    const data = await res.json();
-
-    user_pools = data.positions.my_pools.filter(pool => pool.pool.status === 'live');
+    $user.user_address = user_address;
+    $user.tokens = tokens;
+    $user.lp_tokens = lp_tokens;
+    $user.portfolio = portfolio;
+    $user.farms_metric = farms_metric;
 
     on_chain = false;
     // 🔗 end collecting on chain data 🔗
   }
 
   function clear_account() {
-    user_pools.length = 0;
-    $user_portfolio.tokens = [];
-    $user_portfolio.user_address = "";
+    metrics.length = 0;
+    $user.user_address = "";
+    $user.tokens = [];
+    $user.lp_tokens = [];
+    // clear timers
+    clearInterval(user_data_update_timer);
   }
 </script>
 
@@ -177,23 +143,22 @@
       </div>
     </form>
 
-    {#if $user_portfolio.user_address !== ""}
+    {#if $user.user_address !== ""}
       <fieldset class="portfolio"><legend>📐 account metrics</legend>
           <div class="address-box">
-            <div>{$user_portfolio.user_address}</div>
+            <div>{$user.user_address}</div>
             <div class="clear-btn">
               <button class="primary" on:click={clear_account}>X</button>
             </div>
           </div>
 
           <div class="tokens">
-            <div>{$user_portfolio.user_pls_balance} <img src="/pls.png" alt="/pls.png"/> </div>
-            {#each $user_portfolio.tokens as token}
-              <div>{token.balance} <img src={icons[token.symbol]} alt={icons[token.symbol]}/></div>
+            {#each $user.tokens as token}
+              <div>{getUIFormat(token.balance)} <img src={icons[token.symbol]} alt={icons[token.symbol]}/></div>
             {/each}
 
-            {#each $user_portfolio.lp_tokens as lp}
-              <div>{lp.balance} {lp.symbol} {lp.version}
+            {#each $user.lp_tokens as lp}
+              <div>{getUIFormat(lp.balance)} {lp.symbol} {lp.version}
                 <img src={icons[lp.token_0]} alt={icons[lp.token_0]} />
                 <img src={icons[lp.token_1]} alt={icons[lp.token_1]} />
               </div>
@@ -203,32 +168,24 @@
           <fieldset class="fiat-value">
             <legend>💲</legend>
             <div>
-              {#each $user_portfolio.tokens as token}
+              {#each $user.tokens as token}
                 <div>
                   <div class="token-desc">
                     {token.symbol}<img src={icons[token.symbol]} alt={icons[token.symbol]}/>
                   </div>
-                  <div class="dollar-value">💲{token.dollar_value}</div>
+                  <div class="dollar-value">💲{getUIFormat($user.portfolio[token.symbol])}</div>
                 </div>
               {/each}
-              <div>
-                <div class="token-desc">
-                  PLS<img src="/pls.png" alt="/pls.png"/>
-                </div>
-                <div class="dollar-value">
-                  💲{$user_portfolio.user_pls_dollar_val}
-                </div>
-              </div>
             </div>
             <div>
-              <div>total: 💲{$user_portfolio.total_dollar}</div>
+              <div>total: 💲{getUIFormat($user.portfolio.total)}</div>
             </div>
           </fieldset>
       </fieldset>
     {/if}
 
-    {#each user_pools as pool, i}
-      <Board pool_init_metrics={pool.pool} />
+    {#each $user.farms_metric as metric}
+      <Board {metric} />
     {/each}
   </div>
 

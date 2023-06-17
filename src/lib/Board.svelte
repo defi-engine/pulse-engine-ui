@@ -1,77 +1,95 @@
 <script>
+    import { formatUnits } from 'ethers';
     import {getOptions} from '../echart_utils/gauge';
     import { Chart } from 'svelte-echarts'
     import { onMount } from 'svelte';
 
-    import { user_portfolio } from '../store';
+    import { getUIFormat } from '../utils'
+    // import { user_portfolio } from '../store';
 
-    export let pool_init_metrics;
+    export let metric;
+    // const staked_lp = Number(formatUnits(farm.staked_lp, 18)).toFixed(3)
+    // const pending_inc = Number(formatUnits(farm.pending_inc, 18)).toFixed(3);
 
-    let options = getOptions(pool_init_metrics.ratio, 777);
+    // const token0_init_amount = NaN;
+    // const token1_init_amount = NaN;
 
-    const token0_symbol = pool_init_metrics.token0.symbol;
-    const token1_symbol = pool_init_metrics.token1.symbol;
-    const token0_init_amount = pool_init_metrics.token0.amount;
-    const token1_init_amount = pool_init_metrics.token1.amount;
+    // const token0_current_amount = Number(formatUnits(farm.lp_tokens_amount.token_0, 18));
+    // const token1_current_amount = Number(formatUnits(farm.lp_tokens_amount.token_1, 18));
 
-    const token0_current_amount = undefined;
-    const token1_current_amount = undefined;
+    // const token0_amount_delta = token0_current_amount - token0_init_amount;
+    // const token1_amount_delta = token1_current_amount - token1_init_amount;
 
-    const token0_amount_delta = token0_current_amount - token0_init_amount;
-    const token1_amount_delta = token1_current_amount - token1_init_amount;
+    // const value_when_hold = NaN;
+    // const value_in_the_pool = NaN;
+    // const value_delta = NaN;
+    // const token_0_symbol = farm.token_0_symbol;
+    // const token_1_symbol = farm.token_1_symbol;
+    // // let options = getOptions(pool_init_metrics.ratio, 777);
 
-    const token0_current_price = undefined;
-    const token1_current_price = undefined;
+    // const token0_symbol = pool_init_metrics.token0.symbol;
+    // const token1_symbol = pool_init_metrics.token1.symbol;
+    // const token0_init_amount = pool_init_metrics.token0.amount;
+    // const token1_init_amount = pool_init_metrics.token1.amount;
 
-    const fuel_consumption = undefined;
-    const value_when_hold = (token0_init_amount * token0_current_price) + (token1_init_amount * token1_current_price);
-    const value_in_the_pool = ((token0_current_amount * token0_current_price) + (token1_current_amount * token1_current_price)) - fuel_consumption;
-    const value_delta = value_in_the_pool - value_when_hold;
+    // const token0_current_amount = undefined;
+    // const token1_current_amount = undefined;
 
-    const il_percentage = undefined;
+    // const token0_amount_delta = token0_current_amount - token0_init_amount;
+    // const token1_amount_delta = token1_current_amount - token1_init_amount;
 
-    const pool_status = pool_init_metrics.status;
+    // const token0_current_price = undefined;
+    // const token1_current_price = undefined;
 
-    let days = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60/24);
-    let hours = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60) - days*24;
-    let minuts = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60) - days*24*60 - hours*60
-    let seconds = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)) - days*24*60*60 - hours*60*60 - minuts*60;
+    // const fuel_consumption = undefined;
+    // const value_when_hold = (token0_init_amount * token0_current_price) + (token1_init_amount * token1_current_price);
+    // const value_in_the_pool = ((token0_current_amount * token0_current_price) + (token1_current_amount * token1_current_price)) - fuel_consumption;
+    // const value_delta = value_in_the_pool - value_when_hold;
 
-    function updatePoolDuration() {
-        days = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60/24);
-        hours = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60) - days*24;
-        minuts = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60) - days*24*60 - hours*60
-        seconds = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)) - days*24*60*60 - hours*60*60 - minuts*60;
-    }
+    // const il_percentage = undefined;
 
-    onMount(() => {
-        if (pool_status === 'live') {
-          const interval = setInterval(updatePoolDuration, 1000);
-          return () => clearInterval(interval);          
-        }
-    })
+    // const pool_status = pool_init_metrics.status;
+
+    // let days = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60/24);
+    // let hours = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60) - days*24;
+    // let minuts = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60) - days*24*60 - hours*60
+    // let seconds = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)) - days*24*60*60 - hours*60*60 - minuts*60;
+
+    // function updatePoolDuration() {
+    //     days = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60/24);
+    //     hours = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60/60) - days*24;
+    //     minuts = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)/60) - days*24*60 - hours*60
+    //     seconds = Math.floor(((Date.now() / 1000) - pool_init_metrics.createdDate)) - days*24*60*60 - hours*60*60 - minuts*60;
+    // }
+
+    // onMount(() => {
+    //     if (pool_status === 'live') {
+    //       const interval = setInterval(updatePoolDuration, 1000);
+    //       return () => clearInterval(interval);          
+    //     }
+    // })
 </script>
 
 <div class='board'>
+      <div class='farm-info'>
+        {metric.pool_address}
+        {metric.token_0_symbol}-{metric.token_1_symbol}
+        🔒 Deposited: {getUIFormat(metric.staked_lp)} LP
+        🚜 To harvest: {getUIFormat(metric.pending_inc)} INC
+      </div>
       <div class="echart">
-        <Chart {options} />
+        <!-- <Chart {options} /> -->
       </div>
           <!-- 🧭 -->
       <div class="metrics">
         <div class="metric">
-          ⛽ fuel consumption: {fuel_consumption} PLS
+          ⛽ fuel consumption: {NaN} PLS
         </div>
         <div class="metric">
-          🕕 pool livetime: 
-          {#if pool_status === 'live'}
-            {days}d {hours}h {minuts}m {seconds}s
-          {:else}
-            pool finished 
-          {/if}
-
+          <!-- 🕕 pool livetime: {days}d {hours}h {minuts}m {seconds}s -->
         </div>
         <div class="metric">
-          💸 current impernament loss: {il_percentage}%
+          💸 current impernament loss: {NaN}%
         </div>
       </div>
       <div class="table">
@@ -87,40 +105,37 @@
           <tbody>
             <tr>
               <th scope="row" class="cell">$ value</th>
-              <td class="cell">{value_when_hold}</td>
-              <td class="cell">{value_in_the_pool}</td>
-              {#if value_delta >= 0}
-                <td class="cell delta green">{value_delta}</td>
+              <td class="cell">value_when_hold</td>
+              <td class="cell">value_in_the_pool</td>
+              {#if 1 >= 0}
+                <td class="cell delta green">value_delta</td>
               {:else}
-                <td class="cell delta red">{value_delta}</td>
+                <td class="cell delta red">value_delta</td>
               {/if}
             </tr>
             <tr>
-              <th scope="row" class="cell">{token0_symbol} amount</th>
-              <td class="cell">{token0_init_amount}</td>
-              <td class="cell">{token0_current_amount}</td>
-              {#if token0_amount_delta >= 0}
-                <td class="cell delta green">{token0_amount_delta}</td>
+              <th scope="row" class="cell">{metric.token_0_symbol} amount</th>
+              <td class="cell">token0_init_amount</td>
+              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_0)}</td>
+              {#if 1 >= 0}
+                <td class="cell delta green">token0_amount_delta</td>
               {:else}
-                <td class="cell delta red">{token0_amount_delta}</td>
+                <td class="cell delta red">token0_amount_delta</td>
               {/if}
             </tr>
             <tr>
-              <th scope="row" class="cell">{token1_symbol} amount</th>
-              <td class="cell">{token1_init_amount}</td>
-              <td class="cell">{token1_current_amount}</td>
-              {#if token1_amount_delta >= 0}
-                <td class="cell delta green">{token1_amount_delta}</td>
+              <th scope="row" class="cell">{metric.token_1_symbol} amount</th>
+              <td class="cell">token1_init_amount</td>
+              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_1)}</td>
+              {#if 1 >= 0}
+                <td class="cell delta green">token1_amount_delta</td>
               {:else}
-                <td class="cell delta red">{token1_amount_delta}</td>
+                <td class="cell delta red">token1_amount_delta</td>
               {/if}
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="status">
-        <div class={pool_status}></div><div>pool status: {pool_status}</div>
-    </div>
 </div>
 
 <style>
@@ -161,30 +176,6 @@
     font-size: 12px;
     text-align: center;
     color: white;
-  }
-
-  .board .status {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    top: 5px;
-    right: 5px;
-    font-size: 12px;
-  }
-  .board .status .live {
-    height: 2vh;
-    width: 2vh;
-    margin: 0 3px;
-    border-radius: 100px;
-    background-color: #0f5;
-  }
-  .board .status .finished {
-    height: 2vh;
-    width: 2vh;
-    margin: 0 3px;
-    border-radius: 100px;
-    background-color: #f00;
   }
 
   .cell {
