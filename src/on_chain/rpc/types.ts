@@ -1,15 +1,34 @@
 interface LpTokensAmount {
-  token_0: number;
-  token_1: number;
+  token_A: number;
+  token_B: number;
 }
 
 export interface Farm {
   staked_lp: number;
   pool_address: string;
-  token_0_symbol: string;
-  token_1_symbol: string;
+  token_A_symbol: string;
+  token_B_symbol: string;
   lp_tokens_amount: LpTokensAmount; 
   pending_inc: number;
+  states: State[];
+}
+
+interface State {
+    action: "addLiquidityETH" | "Approve";
+    block_number: string;
+    timestamp: string;
+    token_A: {
+        symbol: "WPLS";
+        value: string;
+    };
+    token_B: {
+        symbol: string;
+        value: string;
+    };
+    minted_lp: {
+        symbol: string;
+        value: string;
+    };
 }
 
 export interface Token {
@@ -20,8 +39,8 @@ export interface Token {
 export interface LpToken {
     balance: number;
     symbol: "PLS" | "PLSX" | "HEX" | "INC";
-    token_0: string;
-    token_1: string;
+    token_A: string;
+    token_B: string;
     total_supply: number;
     reserves: number[];
     version: string;

@@ -8,6 +8,10 @@
     // import { user_portfolio } from '../store';
 
     export let metric;
+
+    // console.log(metric);
+    let options = getOptions(3.7, 2.5);
+
     // const staked_lp = Number(formatUnits(farm.staked_lp, 18)).toFixed(3)
     // const pending_inc = Number(formatUnits(farm.pending_inc, 18)).toFixed(3);
 
@@ -25,7 +29,6 @@
     // const value_delta = NaN;
     // const token_0_symbol = farm.token_0_symbol;
     // const token_1_symbol = farm.token_1_symbol;
-    // // let options = getOptions(pool_init_metrics.ratio, 777);
 
     // const token0_symbol = pool_init_metrics.token0.symbol;
     // const token1_symbol = pool_init_metrics.token1.symbol;
@@ -73,12 +76,12 @@
 <div class='board'>
       <div class='farm-info'>
         {metric.pool_address}
-        {metric.token_0_symbol}-{metric.token_1_symbol}
+        {metric.token_A_symbol}-{metric.token_B_symbol}
         🔒 Deposited: {getUIFormat(metric.staked_lp)} LP
         🚜 To harvest: {getUIFormat(metric.pending_inc)} INC
       </div>
       <div class="echart">
-        <!-- <Chart {options} /> -->
+        <Chart {options} />
       </div>
           <!-- 🧭 -->
       <div class="metrics">
@@ -114,9 +117,9 @@
               {/if}
             </tr>
             <tr>
-              <th scope="row" class="cell">{metric.token_0_symbol} amount</th>
+              <th scope="row" class="cell">{metric.token_A_symbol} amount</th>
               <td class="cell">token0_init_amount</td>
-              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_0)}</td>
+              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_A)}</td>
               {#if 1 >= 0}
                 <td class="cell delta green">token0_amount_delta</td>
               {:else}
@@ -124,9 +127,9 @@
               {/if}
             </tr>
             <tr>
-              <th scope="row" class="cell">{metric.token_1_symbol} amount</th>
+              <th scope="row" class="cell">{metric.token_B_symbol} amount</th>
               <td class="cell">token1_init_amount</td>
-              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_1)}</td>
+              <td class="cell">{getUIFormat(metric.lp_tokens_amount.token_B)}</td>
               {#if 1 >= 0}
                 <td class="cell delta green">token1_amount_delta</td>
               {:else}

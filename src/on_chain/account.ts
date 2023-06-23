@@ -1,5 +1,14 @@
-import {rpc_getPLSBalance, rpc_getTokenData, rpc_getLPContractData, rpc_getUserFarms} from './rpc/handler';
-import { token_contracts, lp_token_contracts, pulseX_contracts } from './rpc/constants';
+import { ethers, formatUnits } from 'ethers';
+
+import {
+    rpc_getPLSBalance,
+    rpc_getTokenData,
+    rpc_getLPContractData,
+    rpc_getUserFarms,
+    rpc_getUserPoolReceipts,
+    rpc_parseAddRmLiquidityETH,
+} from './rpc/handler';
+import { token_contracts, lp_token_contracts, protocol_contracts } from './rpc/constants';
 import type { Farm, Token, Prices, Portfolio } from './rpc/types'
 
 const status = {
@@ -76,6 +85,39 @@ export async function account_getUserDollarPortfolio(tokens: Token[], prices: Pr
 }
 
 export async function account_getUserFarmsMetric(user_address: string): Promise<Farm[]> {
-    const farms: Farm[] = await rpc_getUserFarms(user_address, pulseX_contracts.PULSE_X_MASTER_CHEF);
+    const farms: Farm[] = await rpc_getUserFarms(user_address, protocol_contracts.PULSE_X_MASTER_CHEF);
     return farms;
+}
+
+const provider = new ethers.JsonRpcProvider('https://rpc.pulsechain.com/');
+
+export async function account_collect_user_txs_metrics(farms_metric, user_tx_data, user_address) {
+    // iterate farms
+    for (let f = 0; f < farms_metric.length; f++) {
+      const receipts = await rpc_getUserPoolReceipts(farms_metric[f].pool_address, user_tx_data);
+      if ((farms_metric[f].token_A_symbol + farms_metric[f].token_B_symbol).includes('WPLS')) {
+        // iterate recepits for particular farm
+        for (let r = 0; r < receipts.length; r++) {
+
+            if (receipts[r].input_data.name === 'addLiquidityETH' || 
+                receipts[r].input_data.name === 'removeLiquidityETHWithPermit') {
+                const data = await rpc_parseAddRmLiquidityETH(receipts[r], user_address);
+
+                if (data.length === 0) continue;
+
+                const plp_obj = data.find(item => item.symbol === 'PLP');
+
+                farms_metric[f].states.push({
+                    signature: receipts[r].input_data.name,
+                    block_number: receipts[r].blockNumber,
+                    timestamp: receipts[r].timeStamp,
+                    ratio: data[0].amount / data[1].amount,
+                    token_A: {symbol: data[0].symbol, amount: data[0].amount},
+                    token_B: {symbol: data[1].symbol, amount: data[1].amount},
+                    token_LP: {symbol: plp_obj.symbol, amount: plp_obj.amount},
+                });
+            }
+        }
+      }
+    }
 }

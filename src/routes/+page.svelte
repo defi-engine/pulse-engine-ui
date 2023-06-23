@@ -12,9 +12,8 @@
     account_getUserLPData,
     account_getUserDollarPortfolio,
     account_getUserFarmsMetric,
+    account_collect_user_txs_metrics,
   } from '../on_chain/account'
-  
-import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
 
   import Board from '$lib/Board.svelte'
 
@@ -28,9 +27,9 @@ import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
     }, 10000);
 
     const interval_2 = setInterval(async () => {
-      const obj_pulsex = await graph_getTokenPrice(token_contracts.PULSE_X_CONTRACT_ADDRESS);
-      const obj_phex = await graph_getTokenPrice(token_contracts.HEX_CONTRACT_ADDRESS);
-      const obj_inc = await graph_getTokenPrice(token_contracts.INC_CONTRACT_ADDRESS);
+      const obj_pulsex = await graph_getTokenPrice(token_contracts.PLSX_TOKEN);
+      const obj_phex = await graph_getTokenPrice(token_contracts.HEX_TOKEN);
+      const obj_inc = await graph_getTokenPrice(token_contracts.INC_TOKEN);
 
       $prices['PLSX'] = obj_pulsex.token_dollar_price;
       $prices['PLS'] = (1/Number(obj_pulsex.token_pls_price)) * Number(obj_pulsex.token_dollar_price);
@@ -40,9 +39,9 @@ import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
     }, 60000);
 
     const block = await graph_getLatestBlock();
-    const obj_pulsex = await graph_getTokenPrice(token_contracts.PULSE_X_CONTRACT_ADDRESS);
-    const obj_phex = await graph_getTokenPrice(token_contracts.HEX_CONTRACT_ADDRESS);
-    const obj_inc = await graph_getTokenPrice(token_contracts.INC_CONTRACT_ADDRESS);
+    const obj_pulsex = await graph_getTokenPrice(token_contracts.PLSX_TOKEN);
+    const obj_phex = await graph_getTokenPrice(token_contracts.HEX_TOKEN);
+    const obj_inc = await graph_getTokenPrice(token_contracts.INC_TOKEN);
 
     $basic_metrics.current_block = block.number;
 
@@ -96,16 +95,23 @@ import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
     const portfolio = await account_getUserDollarPortfolio(tokens, $prices);
     const farms_metric = await account_getUserFarmsMetric(user_address); // farms metrics where user is participated
 
-    user_data_update_timer = setInterval(async () => {
-      const farms_metric = await account_getUserFarmsMetric(user_address); // farms metrics where user is participated
-      $user.farms_metric = farms_metric;
-    }, 10000);
+    const user_tx = await fetch(`api/user_tx?address=${user_address}`);
+    const user_tx_json = await user_tx.json();
+    const user_tx_data = user_tx_json.user_tx;
+
+    // TODO: farms_metric is mutating inside this method: make review if it is bad or good practice
+    await account_collect_user_txs_metrics(farms_metric, user_tx_data, user_address);
 
     $user.user_address = user_address;
     $user.tokens = tokens;
     $user.lp_tokens = lp_tokens;
     $user.portfolio = portfolio;
     $user.farms_metric = farms_metric;
+
+    user_data_update_timer = setInterval(async () => {
+      const farms_metric = await account_getUserFarmsMetric(user_address); // farms metrics where user is participated
+      $user.farms_metric = farms_metric;
+    }, 10000);
 
     on_chain = false;
     // 🔗 end collecting on chain data 🔗
@@ -159,8 +165,8 @@ import {rpc_getPoolHistory} from '../on_chain/rpc/handler';
 
             {#each $user.lp_tokens as lp}
               <div>{getUIFormat(lp.balance)} {lp.symbol} {lp.version}
-                <img src={icons[lp.token_0]} alt={icons[lp.token_0]} />
-                <img src={icons[lp.token_1]} alt={icons[lp.token_1]} />
+                <img src={icons[lp.token_A]} alt={icons[lp.token_A]} />
+                <img src={icons[lp.token_B]} alt={icons[lp.token_B]} />
               </div>
             {/each}
           </div>
